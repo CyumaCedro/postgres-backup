@@ -39,7 +39,7 @@ function backup_compressed() {
 
 backup();
 function restore() {
-  execute(`pg_restore -cC -d ${database} ${fileNameGzip}`)
+  execute(`pg_restore -U ${username} -d ${database} -f ${fileName}`)
     .then(async () => {
       console.log("Restored");
     })
