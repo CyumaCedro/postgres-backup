@@ -8,13 +8,13 @@ const date = new Date();
 const currentDate = `${date.getFullYear()}.${
   date.getMonth() + 1
 }.${date.getDate()}.${date.getHours()}.${date.getMinutes()}`;
-const fileName = `database-backup-${currentDate}.tar`;
+const fileName = `database-backup-${currentDate}.sql`;
 
 const compress = require("gzipme");
 
 function backup() {
   execute(
-    `pg_dump "host=localhost port=5432 dbname=${database} user=${username} password=${pgpass}" > dap_export.sql`
+    `pg_dump "host=localhost port=5432 dbname=${database} user=${username} password=${pgpass}" > ./backups/${fileName}`
   )
     .then(async () => {
       console.log("Finito");
