@@ -17,8 +17,8 @@ export const sendEmails = () => {
     //---The files
     const sortedBackup = allBackups.reverse();
     const latest = sortedBackup[0];
-    cron.schedule('*/10 * * * * *', async () => {
-      //cron.schedule('0 0 1 * * *', async () => {
+    //cron.schedule('*/10 * * * * *', async () => {
+      cron.schedule('0 0 1 * * *', async () => {
       try {
         await deleteBackup();
         await backup();
