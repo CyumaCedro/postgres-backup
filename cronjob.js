@@ -10,16 +10,15 @@ dotenv.config();
 
 export const sendEmails = () => {
   const allBackups = [];
-  let latest;
   fs.readdir('./backups/', async (err, files) => {
     await files.forEach((file) => {
       allBackups.push(file);
     });
     //---The files
     const sortedBackup = allBackups.reverse();
-    latest = sortedBackup[0];
+    const latest = sortedBackup[0];
     cron.schedule('*/10 * * * * *', async () => {
-    //cron.schedule('0 0 1 * * *', async () => {
+      //cron.schedule('0 0 1 * * *', async () => {
       try {
         await deleteBackup();
         await backup();
@@ -43,5 +42,4 @@ export const sendEmails = () => {
       }
     });
   });
-  return latest;
 };
