@@ -1,5 +1,5 @@
-const { exec } = require('child_process');
-const dotenv = require('dotenv');
+import { exec } from 'child_process';
+import dotenv from 'dotenv';
 dotenv.config();
 const username = process.env.DB_USERNAME;
 const database = process.env.DB_NAME;
@@ -10,11 +10,16 @@ const currentDate = `${date.getFullYear()}.${
 }.${date.getDate()}.${date.getHours()}.${date.getMinutes()}`;
 const fileName = `database-backup-${currentDate}.sql`;
 
-const compress = require('gzipme');
+import compress from 'gzipme';
 
-function backup() {
+export function backup() {
+  const date_backup = new Date();
+  const currentDate_backup = `${date_backup.getFullYear()}.${
+    date_backup.getMonth() + 1
+  }.${date_backup.getDate()}.${date_backup.getHours()}.${date_backup.getMinutes()}.${date_backup.getSeconds()}`;
+  const fileName_backup = `database-backup-${currentDate_backup}.sql`;
   exec(
-    `pg_dump --dbname=postgresql://${username}:${pgpass}@127.0.0.1:5432/${database}  -F c -b -v -f ./backups/${fileName}`,
+    `pg_dump --dbname=postgresql://${username}:${pgpass}@127.0.0.1:5432/${database}  -F c -b -v -f ./backups/${fileName_backup}`,
     (error, stdout, stderr) => {
       if (error) {
         console.log(error);
@@ -40,7 +45,6 @@ function backup_compressed() {
   );
 }
 
-backup();
 function restore() {
   exec(
     `pg_restore -U ${username} -d ${database} -f ${fileName}`,
