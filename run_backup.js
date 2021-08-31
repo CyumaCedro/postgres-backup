@@ -1,5 +1,5 @@
-const { execute } = require("@getvim/execute");
-const dotenv = require("dotenv");
+const { exec } = require('child_process');
+const dotenv = require('dotenv');
 dotenv.config();
 const username = process.env.DB_USERNAME;
 const database = process.env.DB_NAME;
@@ -10,48 +10,54 @@ const currentDate = `${date.getFullYear()}.${
 }.${date.getDate()}.${date.getHours()}.${date.getMinutes()}`;
 const fileName = `database-backup-${currentDate}.sql`;
 
-const compress = require("gzipme");
+const compress = require('gzipme');
 
 function backup() {
-  execute(
-    `pg_dump "host=localhost port=5432 dbname=${database} user=${username} password=${pgpass}" > ./backups/${fileName}`
-  )
-    .then(async () => {
-      console.log("Finito");
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  exec(
+    `pg_dump --dbname=postgresql://${username}:${pgpass}@127.0.0.1:5432/${database}  -F c -b -v -f ./backups/${fileName}`,
+    (error, stdout, stderr) => {
+      if (error) {
+        console.log(error);
+        return;
+      }
+      console.log('Finito');
+    }
+  );
 }
 
 function backup_compressed() {
-  execute(`pg_dump -U ${username} -d ${database} -f ${fileName} -F t`)
-    .then(async () => {
-      //added line
+  exec(
+    `pg_dump -U ${username} -d ${database} -f ${fileName} -F t`,
+    async (error, stdout, stderr) => {
+      if (error) {
+        console.log(`exec error: ${error}`);
+        return;
+      }
       await compress(fileName);
       fs.unlinkSync(fileName);
-      console.log("Finito");
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+      console.log('Finito');
+    }
+  );
 }
 
 backup();
 function restore() {
-  execute(`pg_restore -U ${username} -d ${database} -f ${fileName}`)
-    .then(async () => {
-      console.log("Restored");
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  exec(
+    `pg_restore -U ${username} -d ${database} -f ${fileName}`,
+    (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        return;
+      }
+      console.log('Restored');
+    }
+  );
 }
 function sendToBackupServer(fileName = fileNameGzip) {
   const form = new FormData();
-  form.append("file", fileName);
+  form.append('file', fileName);
   axios
-    .post("http://my.backupserver.org/private", form, {
+    .post('http://my.backupserver.org/private', form, {
       headers: form.getHeaders(),
     })
     .then((result) => {

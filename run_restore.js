@@ -1,5 +1,5 @@
-const { execute } = require("@getvim/execute");
-const dotenv = require("dotenv");
+const { exec } = require('child_process');
+const dotenv = require('dotenv');
 dotenv.config();
 const username = process.env.DB_USERNAME;
 const database = process.env.DB_NAME;
@@ -11,15 +11,16 @@ const currentDate = `${date.getFullYear()}.${
 const fileName = `database-backup-${currentDate}.sql`;
 
 function restore() {
-  execute(
-    `pg_dump "host=localhost port=5432 dbname=${database} user=${username} password=${pgpass}" > ./backups/database-backup-2021.8.30.15.34.sql`
-  )
-    .then(async () => {
-      console.log("Restored");
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  exec(
+    `pg_restore --dbname=postgresql://${username}:${pgpass}@127.0.0.1:5432/${database}  -v ./backups/database-backup-2021.8.31.11.25.sql`,
+    (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        return;
+      }
+      console.log('Restored');
+    }
+  );
 }
 
 restore();
